@@ -9,21 +9,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout at the last commit of the branch to be merged
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensures all commits are fetched
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Install poetry
+        run: pipx install poetry
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '>3.11'
           cache: 'poetry' # caching poetry dependencies
 
       - name: Install dependencies
-        run: |
-          pip install poetry
-          poetry install
+        run: poetry install --with dev
 
+      - name: Setup repo
+        run: python scripts/setup_repo.py
+
+      # Validate commit messages between the base branch and the last commit of the branch to be merged
       - name: Validate Commit Messages
-        run: python scripts/validate_commits.py ${{ github.base_ref }}
+        if: github.event_name == 'pull_request'
+        run: python scripts/validate_commits.py ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}

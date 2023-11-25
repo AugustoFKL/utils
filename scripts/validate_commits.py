@@ -21,87 +21,44 @@ class CommitValidator:
         """
         self.subprocess = subprocess_module
 
-    def get_commit_hashes(self, base_branch):
+    def validate_commits(self, base_branch, current_ref):
         """
-        Retrieves a list of commit hashes from the specified base branch to HEAD.
+        Validates all commit messages from the specified base branch to the current reference using Commitizen.
 
         Args:
-            base_branch: The base branch to compare with HEAD.
-
-        Returns:
-            A list of commit hashes, or an empty list if an error occurs.
-        """
-        try:
-            commit_hashes = (
-                self.subprocess.check_output(
-                    ["git", "rev-list", "--no-merges", f"{base_branch}..HEAD"],
-                    text=True,
-                )
-                .strip()
-                .split("\n")
-            )
-            return commit_hashes
-        except Exception as e:
-            logger.error(f"Failed to get commit hashes: {e}")
-            return []
-
-    def validate_commit_message(self, commit_hash):
-        """
-        Validates a single commit message using Commitizen.
-
-        Args:
-            commit_hash: The hash of the commit to validate.
-
-        Returns:
-            True if the commit message is valid, False otherwise.
-        """
-        try:
-            self.subprocess.check_output(
-                ["cz", "check", "--commit-msg-file", commit_hash],
-                stderr=self.subprocess.STDOUT,
-            )
-            logger.info(f"Commit {commit_hash} passed validation.")
-            return True
-        except Exception as e:
-            logger.error(f"Validation failed for commit {commit_hash}: {e}")
-            return False
-
-    def validate_commits(self, base_branch):
-        """
-        Validates all commit messages from the specified base branch to HEAD.
-
-        Args:
-            base_branch: The base branch to compare with HEAD.
+            base_branch: The base branch to compare with the current reference.
+            current_ref: The current reference, typically 'HEAD'.
 
         Returns:
             True if all commit messages are valid, False otherwise.
         """
-        commit_hashes = self.get_commit_hashes(base_branch)
-        invalid_commits = [
-            commit
-            for commit in commit_hashes
-            if not self.validate_commit_message(commit)
-        ]
-
-        if invalid_commits:
-            logger.error("Invalid commit messages found for commits:")
-            for commit in invalid_commits:
-                logger.error(commit)
-            return False
-        else:
+        try:
+            self.subprocess.check_output(
+                ["poetry", "run", "cz", "check", "--rev-range", f"{base_branch}..{current_ref}"],
+                stderr=self.subprocess.STDOUT,
+            )
             logger.info("All commit messages are valid.")
             return True
+        except Exception as e:
+            logger.debug(f"Input message: {e.args}")
+
+            if isinstance(e, self.subprocess.CalledProcessError):
+                logger.error(f"Validation failed with exit code {e.returncode}, error: {e.output}")
+            else:
+                logger.error(f"Validation failed with unknown error: {e}")
+            return False
 
 
-def main(base_branch):
+def main(base_branch, ref="HEAD"):
     """
     Main function to validate commit messages.
 
     Args:
-        base_branch: The base branch to compare with HEAD.
+        base_branch: The base branch to compare with the current reference.
+        ref: The current reference, default to HEAD.
     """
     validator = CommitValidator()
-    if not validator.validate_commits(base_branch):
+    if not validator.validate_commits(base_branch, ref):
         sys.exit(1)
 
 
