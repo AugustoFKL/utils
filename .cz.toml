@@ -1,0 +1,84 @@
+[tool.commitizen]
+name = "cz_customize"
+
+[tool.commitizen.customize]
+message_template = "{{change_type}}{% if scope %}({{scope}}){% endif %}: {{description}}{% if body %}\n\n{{body}}{% endif %}{% if footer %}\n\n{{footer}}{% endif %}"
+schema = "<type>[(<scope>)]: <description>\n\n[<body>]\n\n[<footer>]"
+schema_pattern = "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\(.+\\))?: ([\\s\\S]*)"
+info = """
+The expected format of the commit message is as follows:
+
+<type>(<scope>): <description>
+
+<body>
+
+<footer>
+"""
+
+example = """
+feat(database): revamp user authentication system
+
+This commit overhauls the existing authentication system to incorporate
+OAuth 2.0 providers. It introduces significant changes to the database schema,
+models, and the authentication flow.
+
+Changes include:
+- Migration of user tables to support OAuth tokens.
+- Introduction of new environmental variables to manage OAuth configuration.
+- Deprecation of legacy login endpoints.
+
+BREAKING CHANGE:
+- The database schema has been updated to remove the 'password' field from the
+  'users' table. Clients using legacy endpoints must migrate to the new OAuth
+  endpoints.
+- The 'users' API responses no longer include 'session_id'. This field is replaced
+  by 'access_token' conforming to OAuth 2.0 specifications.
+- Failure to update environmental variables will result in authentication errors.
+
+Migration steps:
+1. Apply the new database migration scripts located in `db/migrations/oauth-update`.
+2. Update the client applications to use the new OAuth endpoints.
+3. Ensure all environmental variables are set according to the updated documentation
+   in `docs/env-vars.md`.
+
+This change is part of an effort to standardize authentication across our suite of
+applications and to enhance security by leveraging OAuth 2.0 provider capabilities.
+"""
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "change_type"
+choices = [
+    { value = "feat", name = "feat: A new feature." },
+    { value = "fix", name = "fix: A bug fix." },
+    { value = "docs", name = "docs: Documentation only changes." },
+    { value = "style", name = "style: Code style changes (formatting, missing semi-colons, etc.)" },
+    { value = "refactor", name = "refactor: A code change that neither fixes a bug nor adds a feature." },
+    { value = "perf", name = "perf: A code change that improves performance." },
+    { value = "test", name = "test: Adding missing tests or correcting existing tests." },
+    { value = "build", name = "build: Changes that affect the build system or external dependencies." },
+    { value = "ci", name = "ci: Changes to our CI configuration files and scripts." },
+    { value = "chore", name = "chore: Other changes that don’t modify src or test files." },
+    { value = "revert", name = "revert: Reverts a previous commit." }
+]
+message = "Select the type of change you are committing"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "scope"
+message = "Scope of this change (e.g., component or file name): (optional)"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "description"
+message = "Short description of the change:"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "body"
+message = "Longer description of the change: (optional)"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "footer"
+message = "Footers (e.g., BREAKING CHANGE): (optional)"

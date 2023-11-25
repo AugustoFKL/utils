@@ -1,0 +1,29 @@
+---
+name: Commit Message Validation
+
+on:
+  pull_request:
+
+jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures all commits are fetched
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'poetry' # caching poetry dependencies
+
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          poetry install
+
+      - name: Validate Commit Messages
+        run: python scripts/validate_commits.py ${{ github.base_ref }}

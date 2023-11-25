@@ -1,0 +1,22 @@
+---
+default_install_hook_types:
+  - commit-msg
+  - post-checkout
+  - post-commit
+  - post-merge
+  - post-rewrite
+  - pre-commit
+  - pre-merge-commit
+  - pre-push
+  - pre-rebase
+  - prepare-commit-msg
+repos:
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: 3.12.0
+    hooks:
+      - id: commitizen
+        name: Conventional commit message (commit-message)
+        stages: [commit-msg]
+      - id: commitizen-branch
+        name: Conventional commit message (pre-push)
+        stages: [pre-push]
