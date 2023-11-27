@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="YamllintSettings">
+    <enabled>true</enabled>
+    <binPath>C:\Users\Augusto\AppData\Roaming\Python\Python311\Scripts\yamllint.exe</binPath>
+    <configPath>C:\Users\Augusto\RustroverProjects\hooks\.github\linters\.yaml-lint.yaml</configPath>
+  </component>
+</project>

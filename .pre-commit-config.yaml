@@ -15,8 +15,8 @@ repos:
     rev: 3.12.0
     hooks:
       - id: commitizen
-        name: Conventional commit message (commit-message)
+        name: "Single commit message validation"
         stages: [commit-msg]
       - id: commitizen-branch
-        name: Conventional commit message (pre-push)
+        name: "Branch commit messages validation"
         stages: [pre-push]
