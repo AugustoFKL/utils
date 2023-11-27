@@ -9,10 +9,10 @@ def install_pre_commit_hooks():
 
     logger.info("Setting up pre-commit hooks...")
     try:
-        subprocess.check_call(["pre-commit", "install"])
+        subprocess.check_call(["poetry", "run", "pre-commit", "install"])
         logger.debug(f"Successfully set up hooks")
     except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to set up hooks, error: {e}")
+        logger.error(f"Failed to set up hooks, error: {e.output}")
         sys.exit(1)
 
 

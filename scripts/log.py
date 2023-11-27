@@ -28,7 +28,7 @@ class CustomFormatter(logging.Formatter):
 
 
 # Configure Logger
-logger = logging.getLogger("sql-queries-python-logger")
+logger = logging.getLogger("logger")
 logger.setLevel(logging.DEBUG)
 
 # File Handler

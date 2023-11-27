@@ -6,7 +6,7 @@ from log import logger
 
 class CommitValidator:
     """
-    A class for validating commit messages in a git repository.
+    A class for validating commit messages in a git project.
 
     Attributes:
         subprocess_module: A module for running subprocess commands, default to the subprocess module.
@@ -21,92 +21,42 @@ class CommitValidator:
         """
         self.subprocess = subprocess_module
 
-    def get_commit_hashes(self, base_branch):
+    def validate_commits(self, start_commit, end_commit):
         """
-        Retrieves a list of commit hashes from the specified base branch to HEAD.
+        Validates all commit messages between the start and end commits.
 
         Args:
-            base_branch: The base branch to compare with HEAD.
-
-        Returns:
-            A list of commit hashes, or an empty list if an error occurs.
-        """
-        try:
-            commit_hashes = (
-                self.subprocess.check_output(
-                    ["git", "rev-list", "--no-merges", f"{base_branch}..HEAD"],
-                    text=True,
-                )
-                .strip()
-                .split("\n")
-            )
-            return commit_hashes
-        except Exception as e:
-            logger.error(f"Failed to get commit hashes: {e}")
-            return []
-
-    def validate_commit_message(self, commit_hash):
-        """
-        Validates a single commit message using Commitizen.
-
-        Args:
-            commit_hash: The hash of the commit to validate.
-
-        Returns:
-            True if the commit message is valid, False otherwise.
-        """
-        try:
-            self.subprocess.check_output(
-                ["cz", "check", "--commit-msg-file", commit_hash],
-                stderr=self.subprocess.STDOUT,
-            )
-            logger.info(f"Commit {commit_hash} passed validation.")
-            return True
-        except Exception as e:
-            logger.error(f"Validation failed for commit {commit_hash}: {e}")
-            return False
-
-    def validate_commits(self, base_branch):
-        """
-        Validates all commit messages from the specified base branch to HEAD.
-
-        Args:
-            base_branch: The base branch to compare with HEAD.
+            start_commit: The first commit to validate.
+            end_commit: The last commit to validate.
 
         Returns:
             True if all commit messages are valid, False otherwise.
         """
-        commit_hashes = self.get_commit_hashes(base_branch)
-        invalid_commits = [
-            commit
-            for commit in commit_hashes
-            if not self.validate_commit_message(commit)
-        ]
-
-        if invalid_commits:
-            logger.error("Invalid commit messages found for commits:")
-            for commit in invalid_commits:
-                logger.error(commit)
-            return False
-        else:
+        try:
+            self.subprocess.check_output(
+                ["cz", "check", "--rev-range", f"{start_commit}..{end_commit}"],
+                stderr=self.subprocess.STDOUT,
+            )
             logger.info("All commit messages are valid.")
             return True
+        except Exception as e:
+            logger.debug(f"Input message: {e.args}")
+
+            if isinstance(e, self.subprocess.CalledProcessError):
+                logger.error(f"Validation failed with exit code {e.returncode}, error: {e.output}")
+            else:
+                logger.error(f"Validation failed with unknown error: {e}")
+            return False
 
 
-def main(base_branch):
+def main(first_commit, last_commit):
     """
-    Main function to validate commit messages.
+    Main function to validate all commit messages between two commits.
 
     Args:
-        base_branch: The base branch to compare with HEAD.
+        first_commit: The first commit to validate.
+        last_commit: The last commit to validate.
     """
     validator = CommitValidator()
-    if not validator.validate_commits(base_branch):
+    if not validator.validate_commits(first_commit, last_commit):
         sys.exit(1)
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        logger.error("Error: Base branch argument is missing")
-        sys.exit(1)
-    main(sys.argv[1])
