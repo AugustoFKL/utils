@@ -16,26 +16,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '>3.11'
-          cache: 'poetry'
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Setup repo
-        run: python scripts/setup_repo.py
-
-      # Validate commit messages between the base branch and the last commit of
-      # the branch to be merged
-      - name: Validate Commit Messages
-        if: github.event_name == 'pull_request'
-        run: |
-          python scripts/validate_commits.py \
-          ${{ github.event.pull_request.base.sha }} \
-          ${{ github.event.pull_request.head.sha }}
+      # Run commit message validation workflow
+      - name: Validate commit messages
+        uses: ./github-actions/commit-message-validation
