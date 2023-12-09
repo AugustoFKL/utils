@@ -1,0 +1,27 @@
+---
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+      include: scope
+    labels:
+      - "env: cross-platform"
+      - "type: ci"
+    target-branch: "master"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+      include: scope
+    labels:
+      - "env: cross-platform"
+      - "type: ci"
+    target-branch: "master"
