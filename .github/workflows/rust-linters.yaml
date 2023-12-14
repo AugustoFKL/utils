@@ -1,0 +1,46 @@
+---
+name: Lint Rust Code
+
+"on":
+  # Since the repository is public, there are no concerns regarding CI usage.
+  push:
+
+jobs:
+  lint:
+    name: Lint Rust Code
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Extract Rust Channel
+        id: toolchain
+        run: |
+          version=$(grep -Eo 'channel = \"[0-9\.]+\"' rust-toolchain.toml | \
+          grep -Eo '[0-9\.]+')
+          echo "version=$version"
+          echo "::set-output name=version::$version"
+        shell: bash
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "${{ steps.toolchain.outputs.version }}"
+          components: rustfmt, clippy
+
+      - name: Run Rustfmt
+        run: cargo fmt -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
