@@ -261,3 +261,7 @@ cython_debug/
 # Added by cargo
 
 /target
+
+# Project specific
+
+project_settings.toml

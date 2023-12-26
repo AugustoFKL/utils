@@ -1,6 +1,6 @@
+import json
 import subprocess
 import sys
-import json
 
 from log import logger
 
@@ -21,8 +21,8 @@ def remove_label(repo, name):
     command = (
         f"gh api "
         f"--method DELETE "
-        f"-H \"Accept: application/vnd.github.v3+json\" "
-        f"repos/{user}/{repo}/labels/\"{name}\""
+        f'-H "Accept: application/vnd.github+json" '
+        f'repos/{user}/{repo}/labels/"{name}"'
     )
     try:
         subprocess.run(
@@ -34,7 +34,9 @@ def remove_label(repo, name):
         )
         logger.debug(f"Label '{name}' removed successfully.")
     except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to remove label '{name}': {e.stdout}, {e.stderr}")
+        logger.error(
+            f"Failed to remove label '{name}': {e.stdout}, {e.stderr}"
+        )
         sys.exit(1)
 
 
@@ -73,28 +75,6 @@ def get_labels(repo):
 
     response = json.loads(result.stdout.decode("utf-8"))
 
-    # The labels are returned in the format:
-    # [
-    #   {
-    #     "id": 208045946,
-    #     "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
-    #     "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
-    #     "name": "bug",
-    #     "description": "Something isn't working",
-    #     "color": "f29513",
-    #     "default": true
-    #   },
-    #   {
-    #     "id": 208045947,
-    #     "node_id": "MDU6TGFiZWwyMDgwNDU5NDc=",
-    #     "url": "https://api.github.com/repos/octocat/Hello-World/labels/enhancement",
-    #     "name": "enhancement",
-    #     "description": "New feature or request",
-    #     "color": "a2eeef",
-    #     "default": false
-    #   }
-    # ]
-
     labels = []
     for item in response:
         name = item["name"]
@@ -127,7 +107,7 @@ if __name__ == "__main__":
         sys.exit(1)
     elif len(sys.argv) > 2:
         logger.error(
-            "Too many arguments provided, only the repository name is needed, received {}.".format(
+            "Too many arguments provided expected 1, received {}.".format(
                 sys.argv
             )
         )
