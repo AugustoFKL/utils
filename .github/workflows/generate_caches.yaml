@@ -21,11 +21,8 @@ jobs:
       - name: Extract Rust Channel
         id: toolchain
         shell: bash
-        run: |
-            version=$(grep -Eo 'channel = \"[0-9\.]+\"' rust-toolchain.toml | \
-            grep -Eo '[0-9\.]+')
-            echo "version=$version"
-            echo "version=$version" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}/scripts
+        run: python3 utils.py extract-rust-channel
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -41,8 +38,8 @@ jobs:
           os=${{ matrix.os }}
           target=${{ matrix.target }}
           lock_hash=${{ hashFiles('**/Cargo.lock') }}
-          echo "prefix-key=rust-$os-$target-" >> "$GITHUB_OUTPUT"
-          echo "shared-key=rust-$lock_hash" >> "$GITHUB_OUTPUT"
+          echo "prefix-key=rust-$os-$target" >> "$GITHUB_OUTPUT"
+          echo "shared-key=$lock_hash" >> "$GITHUB_OUTPUT"
 
       # Here, we suppose the 'Cargo.lock' file is present in the repository.
       # If not, we should add a step to generate it.
@@ -55,6 +52,7 @@ jobs:
           cache-all-crates: true
 
       - name: Run check to generate clippy cache
+        if: ${{ steps.cache-keys.outputs.cache-hit }} == 'false'
         shell: bash
         run: |
           cargo check \
@@ -65,37 +63,12 @@ jobs:
           --target ${{ matrix.target }}
 
       - name: Run build to generate test and release cache
+        if: ${{ steps.cache-keys.outputs.cache-hit }} == 'false'
         shell: bash
         run: |
           cargo build \
           --release \
-          --all-features \
-          --all-targets \
-          --locked \
-          --target ${{ matrix.target }}
-
-      # Run clippy
-      - name: Run clippy
-        shell: bash
-        run: |
-          cargo clippy \
-          --all-targets \
-          --all-features \
-          --locked \
-          --target ${{ matrix.target }} \
-          -- -D warnings
-
-      # Run rustfmt
-      - name: Run rustfmt
-        shell: bash
-        run: cargo fmt --all -- --check
-
-      # Run tests
-      - name: Run tests
-        shell: bash
-        run: |
-          cargo test \
-          --release \
+          --workspace \
           --all-features \
           --all-targets \
           --locked \
