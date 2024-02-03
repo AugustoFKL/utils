@@ -1,0 +1,102 @@
+---
+name: Generate Caches
+
+"on":
+  push:
+
+jobs:
+  generate-caches:
+    name: Generate Caches for the Rust project
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: "x86_64-unknown-linux-gnu"
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract Rust Channel
+        id: toolchain
+        shell: bash
+        run: |
+            version=$(grep -Eo 'channel = \"[0-9\.]+\"' rust-toolchain.toml | \
+            grep -Eo '[0-9\.]+')
+            echo "version=$version"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: "clippy, rustfmt"
+          toolchain: ${{ steps.toolchain.outputs.version }}
+          targets: ${{ matrix.target }}
+
+      - name: Define prefix key and shared key
+        id: cache-keys
+        shell: bash
+        run: |
+          os=${{ matrix.os }}
+          target=${{ matrix.target }}
+          lock_hash=${{ hashFiles('**/Cargo.lock') }}
+          echo "prefix-key=rust-$os-$target-" >> "$GITHUB_OUTPUT"
+          echo "shared-key=rust-$lock_hash" >> "$GITHUB_OUTPUT"
+
+      # Here, we suppose the 'Cargo.lock' file is present in the repository.
+      # If not, we should add a step to generate it.
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ steps.cache-keys.outputs.prefix-key }}
+          shared-key: ${{ steps.cache-keys.outputs.shared-key }}
+          cache-targets: true
+          cache-all-crates: true
+
+      - name: Run check to generate clippy cache
+        shell: bash
+        run: |
+          cargo check \
+          --workspace \
+          --all-features \
+          --all-targets \
+          --locked \
+          --target ${{ matrix.target }}
+
+      - name: Run build to generate test and release cache
+        shell: bash
+        run: |
+          cargo build \
+          --release \
+          --all-features \
+          --all-targets \
+          --locked \
+          --target ${{ matrix.target }}
+
+      # Run clippy
+      - name: Run clippy
+        shell: bash
+        run: |
+          cargo clippy \
+          --all-targets \
+          --all-features \
+          --locked \
+          --target ${{ matrix.target }} \
+          -- -D warnings
+
+      # Run rustfmt
+      - name: Run rustfmt
+        shell: bash
+        run: cargo fmt --all -- --check
+
+      # Run tests
+      - name: Run tests
+        shell: bash
+        run: |
+          cargo test \
+          --release \
+          --all-features \
+          --all-targets \
+          --locked \
+          --target ${{ matrix.target }}
