@@ -6,7 +6,7 @@ authors = ["AugustoFKL"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "=3.11.4"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.6.0"

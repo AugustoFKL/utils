@@ -1,9 +1,10 @@
 ---
-name: Lint Rust Code
+name: Generate Caches
 
 "on":
-  # Since the repository is public, there are no concerns regarding CI usage.
   push:
+    branches:
+      - master
 
 # Concurrency serves to prevent simultaneous execution of multiple identical
 # workflows in the same branch.
@@ -12,9 +13,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint Rust Code
+  generate-caches:
+    name: Generate Caches for the Rust project
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04
@@ -29,13 +31,8 @@ jobs:
             target: "x86_64-pc-windows-msvc"
 
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      packages: read
-      statuses: write
-
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Extract Rust Channel
@@ -75,15 +72,25 @@ jobs:
           cache-targets: true
           cache-all-crates: true
 
-      - name: Run Rustfmt
-        run: cargo fmt -- --check
-
-      - name: Run Clippy
+      - name: Run check to generate clippy cache
+        if: ${{ steps.cache-keys.outputs.cache-hit }} == 'false'
         shell: bash
         run: |
-            cargo clippy \
-            --workspace \
-            --all-features \
-            --all-targets \
-            --locked \
-            --target ${{ matrix.target }}
+          cargo check \
+          --workspace \
+          --all-features \
+          --all-targets \
+          --locked \
+          --target ${{ matrix.target }}
+
+      - name: Run build to generate test and release cache
+        if: ${{ steps.cache-keys.outputs.cache-hit }} == 'false'
+        shell: bash
+        run: |
+          cargo build \
+          --release \
+          --workspace \
+          --all-features \
+          --all-targets \
+          --locked \
+          --target ${{ matrix.target }}

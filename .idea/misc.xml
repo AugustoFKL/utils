@@ -2,6 +2,7 @@
 <project version="4">
   <component name="Black">
     <option name="enabledOnReformat" value="true" />
+    <option name="enabledOnSave" value="true" />
     <option name="pathToExecutable" value="C:\Users\Augusto\AppData\Local\Programs\Python\Python311\Scripts\black.exe" />
     <option name="sdkName" value="Poetry (hooks)" />
   </component>
