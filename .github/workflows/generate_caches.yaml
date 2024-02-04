@@ -8,15 +8,36 @@ jobs:
   generate-caches:
     name: Generate Caches for the Rust project
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04
             target: "x86_64-unknown-linux-gnu"
+          - os: ubuntu-20.04
+            target: "x86_64-unknown-linux-gnu"
+          - os: macos-12
+            target: "x86_64-apple-darwin" # For macOS Intel
+          - os: macos-12
+            target: "aarch64-apple-darwin" # For macOS M1
+          - os: windows-2022
+            target: "x86_64-pc-windows-msvc"
 
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.4'
+          cache: 'poetry'
+
+      - name: Install Poetry dependencies
+        run: poetry install
 
       - name: Extract Rust Channel
         id: toolchain
@@ -43,6 +64,7 @@ jobs:
 
       # Here, we suppose the 'Cargo.lock' file is present in the repository.
       # If not, we should add a step to generate it.
+      # TODO: Add a logic to delete old caches.
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
         with:
