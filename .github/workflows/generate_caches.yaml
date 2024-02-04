@@ -16,9 +16,9 @@ jobs:
           - os: ubuntu-20.04
             target: "x86_64-unknown-linux-gnu"
           - os: macos-12
-            target: "x86_64-apple-darwin" # For macOS Intel
+            target: "x86_64-apple-darwin"
           - os: macos-12
-            target: "aarch64-apple-darwin" # For macOS M1
+            target: "aarch64-apple-darwin"
           - os: windows-2022
             target: "x86_64-pc-windows-msvc"
 
@@ -27,23 +27,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11.4'
-          cache: 'poetry'
-
-      - name: Install Poetry dependencies
-        run: poetry install
-
       - name: Extract Rust Channel
-        id: toolchain
         shell: bash
-        working-directory: ${{ github.workspace }}/scripts
-        run: python3 utils.py extract-rust-channel
+        id: toolchain
+        run: |
+          version=$(grep -Eo 'channel = \"[0-9\.]+\"' rust-toolchain.toml | \
+          grep -Eo '[0-9\.]+')
+          echo "version=$version"
+          echo "::set-output name=version::$version"
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
