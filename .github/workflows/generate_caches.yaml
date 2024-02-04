@@ -3,6 +3,14 @@ name: Generate Caches
 
 "on":
   push:
+    branches:
+      - master
+
+# Concurrency serves to prevent simultaneous execution of multiple identical
+# workflows in the same branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   generate-caches:
