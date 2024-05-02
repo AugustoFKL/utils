@@ -4,6 +4,8 @@ name: Lint Code Base
 "on":
   # Since the repository is public, there are no concerns regarding CI usage.
   push:
+    branches:
+      - dev
 
 jobs:
   build:
