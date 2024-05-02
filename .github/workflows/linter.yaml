@@ -5,7 +5,13 @@ name: Lint Code Base
   # Since the repository is public, there are no concerns regarding CI usage.
   push:
     branches:
-      - dev
+      - master
+
+# Concurrency serves to prevent simultaneous execution of multiple identical
+# workflows in the same branch.
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -33,3 +39,4 @@ jobs:
           VALIDATE_YAML: true
           YAML_CONFIG_FILE: ".yaml-lint.yaml"
           YAML_ERROR_ON_WARNING: true
+...
