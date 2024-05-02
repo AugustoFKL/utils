@@ -9,7 +9,7 @@ name: Generate Caches
 # Concurrency serves to prevent simultaneous execution of multiple identical
 # workflows in the same branch.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
