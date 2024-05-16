@@ -1,8 +1,20 @@
 use anyhow::Result;
-use log4rs::config::Deserializers;
+use log4rs::append::console::ConsoleAppender;
+use log4rs::Config;
+use log4rs::config::{Appender, Root};
+use log::LevelFilter;
 
 pub fn init() -> Result<()> {
-    log4rs::init_file("./src/utils/logging.yaml", Deserializers::default())
+    let stdout = ConsoleAppender::builder().build();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("stdout", Box::new(stdout)))
+        .build(Root::builder().appender("stdout").build(LevelFilter::Trace))
+        .unwrap();
+
+    let _ = log4rs::init_config(config)?;
+
+    Ok(())
 }
 
 #[cfg(test)]
