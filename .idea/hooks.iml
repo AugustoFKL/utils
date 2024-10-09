@@ -14,6 +14,15 @@
       <excludeFolder url="file://$MODULE_DIR$/.pytest_cache" />
       <excludeFolder url="file://$MODULE_DIR$/.pytest_cache/v" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/github_jira_integration/__pycache__" />
+      <excludeFolder url="file://$MODULE_DIR$/github_jira_integration/github_webhooks/__pycache__" />
+      <excludeFolder url="file://$MODULE_DIR$/github_jira_integration/github_webhooks/general_model/__pycache__" />
+      <excludeFolder url="file://$MODULE_DIR$/github_jira_integration/github_webhooks/webhooks_model/__pycache__" />
+      <excludeFolder url="file://$MODULE_DIR$/github_jira_integration/jira_api/__pycache__" />
+      <excludeFolder url="file://$MODULE_DIR$/github_jira_integration/tools/__pycache__" />
+      <excludeFolder url="file://$MODULE_DIR$/github_jira_integration/workflow_logic/__pycache__" />
+      <excludeFolder url="file://$MODULE_DIR$/scripts/__pycache__" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
