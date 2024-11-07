@@ -1,2 +1,6 @@
 # Default: 2015
 edition = "2021"
+
+imports_granularity = "Module"
+reorder_impl_items = true
+use_field_init_shorthand = true
